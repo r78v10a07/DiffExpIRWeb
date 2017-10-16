@@ -1,0 +1,26 @@
+{% extends 'main/_base.html' %}
+
+{% block home_page %}
+
+    {% load staticfiles %}
+    <div id="intron_div" intron_id="{{ intron.id }}" intron_coord="{{ coord }}">
+        <h2>Intron {{ intron.chr }}:{{ intron.start }}-{{ intron.end }}, Gene: {{ intron.gene }}</h2>
+        <div id="SV0" class="SeqViewerApp"></div>
+    </div>
+
+    <script>
+        function loadseqviwer() {
+            "use strict";
+            console.log("loadSVdata");
+            var app = SeqView.App.findAppByDivId('SV0') || new SeqView.App('SV0');
+            var coord = $("#intron_div").attr("intron_coord");
+            console.log("Coord: " + coord)
+            app.reload("appname=testapp&amp;id=NC_000001.10&amp;v=" + coord);
+        }
+
+        window.onload = function () {
+            console.log("Ready function");
+            loadseqviwer();
+        };
+    </script>
+{% endblock home_page %}

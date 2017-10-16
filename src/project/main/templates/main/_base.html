@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        DiffExpIR {{ title }}
+    </title>
+
+    {% load staticfiles %}
+    {% load compress %}
+
+    {% compress css %}
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript" src="https://test.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
+        <script type="text/javascript" src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'underscore/underscore-min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'd3/d3.js' %}"></script>
+        <script type="text/javascript" src="{% static 'd3-tip/index.js' %}"></script>
+        <script type="text/javascript" src="{% static 'main/js/utils.js' %}"></script>
+        <script type="text/javascript" src="{% static 'main/js/seqviewer.js' %}"></script>
+        <script type="text/javascript" src="{% static 'main/js/experiment.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'main/css/layout.css' %}"/>
+        <link rel="stylesheet" href="{% static 'main/css/style.css' %}"/>
+
+        {% if refresh %}
+            <meta http-equiv="refresh" content="15">
+        {% endif %}
+    {% endcompress %}
+
+</head>
+<body>
+<div id="page-wrapper">
+    <div id="header-row" class="layout-row">
+        <div id="header-wrapper">
+            <div id="logo-header">
+                <div class="center"><img src="{% static 'main/images/logo.png' %}" height="65px"
+                                         alt="DIFFerentially EXPressed Intron Retention"/></div>
+            </div>
+            <div id="logo-name"><span style="font-family: Arial; font-size: 180%;">DIFFerentially EXPressed Intron Retention</span>
+            </div>
+            <div id="main-menu" class="navigation">
+                <ul id="main-menu-links" class="links">
+                    <li></li>
+                    <li class="{% if current_menu == 'Home' %}current{% endif %}">
+                        <a href="{% url 'diffexpir:index' %}" class="homelink">Home</a>
+                    </li>
+                    {#                    <li class="{% if current_menu == 'Projects' %}current{% endif %}">#}
+                    {#                        <a href="{% url 'diffexpir:prj' %}" class="homelink">Projects</a>#}
+                    {#                    </li>#}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div id="content-row" class="layout_row">
+        <div id="main-wrapper">
+            <div id="main">
+                <div class="table">
+                    <div class="table_row">
+                        <div class="table_cell">
+                            <div id="maincontent">
+                                <div id="content">
+                                    {% block home_page %} {% endblock %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table_cell">
+                            {% block right_side_bar %} {% endblock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer-row" class="layout_row">
+        <div id="footer-wrapper">
+            <div class="center">
+                <a href="//www.nlm.nih.gov/">NLM</a>/<a href="//www.ncbi.nlm.nih.gov/">NCBI</a>/<a
+                    href="//www.ncbi.nlm.nih.gov/CBBresearch/">CBB</a><br>
+                The National Institutes of Health (NIH)<br>
+                <a class="disclaimer" href="//www.ncbi.nlm.nih.gov/About/disclaimer.html">Copyright</a>/
+                <a class="disclaimer" href="//www.ncbi.nlm.nih.gov/About/disclaimer.html#disclaimer">Disclaimer</a>/
+                <a class="disclaimer" href="//www.nlm.nih.gov/privacy.html">Privacy</a>/
+                <a class="disclaimer" href="//www.ncbi.nlm.nih.gov/home/about/">About</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+

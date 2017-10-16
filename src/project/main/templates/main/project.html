@@ -1,0 +1,74 @@
+{% extends 'main/_base.html' %}
+
+{% block home_page %}
+
+    {% load staticfiles %}
+    {% if prj %}
+        <h2>Project: {{ prj }}</h2>
+        <h3>Conditions</h3>
+        {% for c in prj.condition_set.all %}
+            <div id="cond_{{ c.id }}" class="data_block">
+                <h2>{{ c.name }}</h2>
+                <p>{{ c.description }}</p>
+                <p>Samples: {{ c.sample.all|length }}</p>
+                <div class="data_1_block">
+                    <h3>Experiments</h3>
+                    {% for e in c.condition1.all %}
+                        <div class="data_1_block">
+                            <a href="{% url 'diffexpir:exp' e.id %}" title="{{ e.name }}"><h3>{{ e.name }}</h3></a>
+                            <p>{{ e.description }}</p>
+                        </div>
+                    {% endfor %}
+                    {% for e in c.condition2.all %}
+                        <div class="data_1_block">
+                            <a href="{% url 'diffexpir:exp' e.id %}" title="{{ e.name }}"><h3>{{ e.name }}</h3></a>
+                            <p>{{ e.description }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        {% for p in prjs %}
+            <div id="prj_{{ p.id }}" class="data_block">
+                <a href="{% url 'diffexpir:prj' p.id %}" title="{{ p.name }}"><h2>{{ p.name }}</h2></a>
+                <p>{{ p.description }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock home_page %}
+
+{% block right_side_bar %}
+    <div id="right-sidebar"
+         style="background-color: aliceblue;padding-top: 10px;padding-bottom: 10px;">
+        <div class="sidebar_box">
+            <h3>Experiments</h3>
+            <ol>
+                {% for s in exps %}
+                    <li>
+                        <a href="{% url 'diffexpir:exp' s.id %}" title="{{ e.name }}"><b>{{ s.name }}</b></a>
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+        <hr>
+        <h2 style="margin-left: 20px;">Publications</h2>
+
+        <div style="font-size: 90%;">
+            <ol>
+                {% for p in papers %}
+                    <li>
+                        {{ p.authors }} <a href="{{ p.url }}"
+                                           target="_blank">{{ p.title }}</a>,
+                        <b>{{ p.journal }}.</b> ({{ p.year }}) {{ p.volume }}
+                        ({{ p.issue }}):{{ p.pages }}
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+{% endblock right_side_bar %}

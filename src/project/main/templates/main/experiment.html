@@ -1,0 +1,238 @@
+{% extends 'main/_base.html' %}
+
+
+{% block home_page %}
+
+    {% load staticfiles %}
+    {% csrf_token %}
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+    </style>
+
+    <div id="exp_div" exp_id="{{ exp.id }}">
+
+        <h2>Experiment: {{ exp.name }}</h2>
+
+        <div id="loading_icon" class="visible" style="margin-top: 58px; margin-left: 333px; ">
+            <img width="50px" src="{% static 'main/images/bigrotation2.gif' %}"
+                 alt="Loading ..."/>
+        </div>
+        <div id="exp_div_data" class="invisible">
+            <div id="volcanoplot"></div>
+            <div style="margin-top:-12px;font-size: small; text-align: center">Click and drag the mouse inside the plot
+                to select
+                regions
+            </div>
+            <button id="resetplot" style="margin-left: 665px;">Reset Plot</button>
+            <div id="intron_list_div">
+                <div id="intron_list_container" style="margin-top: 18px;margin-left: 30px;">
+
+                    <fieldset class="fieldset-job">
+                        <legend>Cutoffs</legend>
+                        <div style="margin-bottom: 10px;">
+
+                        </div>
+                        <div class="table">
+                            <div class="table_row">
+                                <div class="table_cell">
+                                    <div style="margin-left: 47px;">
+                                        P-Value: <input id="pvalue_cutoff" size="7"
+                                                        value="{{ exp.pvalue_cutoff }}"/>
+                                    </div>
+                                </div>
+                                <div class="table_cell">
+                                    <div>
+                                        abs(Log2(FC)): <input id="fc_cutoff" size="4" value="2.0"/>
+                                    </div>
+                                </div>
+                                <div class="table_cell">
+                                    <div>
+                                        R: <input id="r_cutoff" size="4" value="{{ exp.r_cutoff }}"/>
+                                    </div>
+                                </div>
+                                <div class="table_cell">
+                                    <div>
+                                        View significative: <input type="checkbox" id="view_sig"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table_row">
+                                <div class="table_cell">
+                                    <div style="margin-top: 20px;"></div>
+                                </div>
+                                <div class="table_cell">
+                                    <div style="margin-top: 20px;"></div>
+                                </div>
+                                <div class="table_cell">
+                                    <div style="margin-top: 20px;"></div>
+                                </div>
+                                <div class="table_cell">
+                                    <button id="update_cutoff" onclick="update_cutoff();"
+                                            style="margin-top: 20px;margin-left: 73px;">Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="fieldset-job">
+                        <legend>Filters</legend>
+                        <div style="margin-bottom: 10px;">
+
+                        </div>
+                        <div class="table">
+                            <div class="table_row">
+                                <div class="table_cell">
+                                    <select id="chrbox" name="chrbox" style="margin-left: 107px;">
+                                        <option value="0" selected="selected"> All Chromosomes</option>
+                                        <option value="1">Chr1</option>
+                                        <option value="2">Chr2</option>
+                                        <option value="3">Chr3</option>
+                                        <option value="4">Chr4</option>
+                                        <option value="5">Chr5</option>
+                                        <option value="6">Chr6</option>
+                                        <option value="7">Chr7</option>
+                                        <option value="8">Chr8</option>
+                                        <option value="9">Chr9</option>
+                                        <option value="10">Chr10</option>
+                                        <option value="11">Chr11</option>
+                                        <option value="12">Chr12</option>
+                                        <option value="13">Chr13</option>
+                                        <option value="14">Chr14</option>
+                                        <option value="15">Chr15</option>
+                                        <option value="16">Chr16</option>
+                                        <option value="17">Chr17</option>
+                                        <option value="18">Chr18</option>
+                                        <option value="19">Chr19</option>
+                                        <option value="20">Chr20</option>
+                                        <option value="21">Chr21</option>
+                                        <option value="22">Chr22</option>
+                                        <option value="X">ChrX</option>
+                                        <option value="Y">ChrY</option>
+                                    </select>
+
+                                    <div class="invisible">
+                                        <div id="chr_name_filer"></div>
+                                    </div>
+                                </div>
+                                <div class="table_cell">
+                                    <div style="margin-left: 61px;">
+                                        <div id="gene_name_filer"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table_row">
+                                <div class="table_cell">
+                                    <div style="margin-top: 23px;">
+                                        <div id="tpm1_filter"></div>
+                                    </div>
+                                </div>
+                                <div class="table_cell">
+                                    <div style="margin-top: 23px;">
+                                        <div id="tpm2_filter"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div id="intron_table" style="margin-top: 12px;"></div>
+                    <div class="right aux">
+                        <a id="download_cvs" style="cursor: pointer;">Download data (CSV Format)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="intron-popup" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="intron_loading_icon" class="visible" src="{% static 'main/images/bigrotation2.gif' %}"
+                 alt="Retrieving data ... "/>
+            <div id="intron_div_data" class="visible" snp_name="">
+                <h2 id="intron_title">Intron</h2>
+                Location
+                <spam id="chr-name"></spam>
+                :
+                <spam id="intron-loc"></spam>
+                <br>
+                Gene Name:
+                <spam id="gene-name"></spam>
+                <br>
+                <h3>Genome Browser</h3>
+                <div id="SV0" class="SeqViewerApp"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        function update_cutoff() {
+            $("#exp_div_data").removeClass("visible").addClass("invisible");
+            $("#loading_icon").removeClass("invisible").addClass("visible");
+            retrieve_experiment_data();
+        }
+
+        $("#resetplot").click(function () {
+            $("#exp_div_data").removeClass("visible").addClass("invisible");
+            $("#loading_icon").removeClass("invisible").addClass("visible");
+            var element = $("#exp_div");
+            var attr = document.getElementById("exp_div").attributes;
+            var exp = element.attr("exp_id");
+            for (var i = attr.length - 1; i >= 0; i--) {
+                element.removeAttr(attr[i].name);
+            }
+            element.attr("id", "exp_div");
+            element.attr("exp_id", exp);
+            retrieve_experiment_data();
+        });
+
+        window.onload = function () {
+            console.log("Ready function");
+            $('#resetplot').button();
+            $('#resetplot').button('disable');
+            retrieve_experiment_data();
+        };
+    </script>
+{% endblock home_page %}
+
+{% block right_side_bar %}
+    <div id="right-sidebar"
+         style="background-color: aliceblue;padding-top: 10px;padding-bottom: 10px;">
+        <div class="sidebar_box">
+            <h3>Experiments</h3>
+            <ol>
+                {% for s in exps %}
+                    <li>
+                        <a href="{% url 'diffexpir:exp' s.id %}" title="{{ e.name }}"><b>{{ s.name }}</b></a>
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+        <hr>
+        <h2 style="margin-left: 20px;">Publications</h2>
+
+        <div style="font-size: 90%;">
+            <ol>
+                {% for p in papers %}
+                    <li>
+                        {{ p.authors }} <a href="{{ p.url }}"
+                                           target="_blank">{{ p.title }}</a>,
+                        <b>{{ p.journal }}.</b> ({{ p.year }}) {{ p.volume }}
+                        ({{ p.issue }}):{{ p.pages }}
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+{% endblock right_side_bar %}

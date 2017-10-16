@@ -1,0 +1,52 @@
+PROJECT_NAME: Detecting IR in CLL samples
+PROJECT_DESCR: Processing samples from EGA for CLL and detecting differentially expressed introns retained
+CONDITIONS:
+  - NAME: Ctrl
+    DESCR: Control samples
+    SAMPLE_TYPE: NBC
+  - NAME: CLL
+    DESCR: CLL samples
+    SAMPLE_TYPE: not NBC
+  - NAME: Mut
+    DESCR: CLL mutated samples
+    SAMPLE_TYPE: MUT
+  - NAME: Unm
+    DESCR: CLL un-mutated samples
+    SAMPLE_TYPE: UNM
+EXPERIMENTS:
+  - NAME: CLL vs Ctrl
+    DESCR: Control vs all CLL samples
+    COND1: CLL
+    COND2: Ctrl
+    TPMRATIONCUTOFF: 2.0
+    PVALUECUTOFF: 1E-6
+    RCUTOFF: -1.0
+    DIFFEXPIR: requirements/diffexpir_ctrl_cll.txt
+  - NAME: CLL Mut vs Ctrl
+    DESCR: Control vs mutated CLL samples
+    COND1: Mut
+    COND2: Ctrl
+    TPMRATIONCUTOFF: 2.0
+    PVALUECUTOFF: 1E-6
+    RCUTOFF: -1.0
+    DIFFEXPIR: requirements/diffexpir_ctrl_mut.txt
+  - NAME: CLL Unm vs Ctrl
+    DESCR: Control vs un-mutated CLL samples
+    COND1: Unm
+    COND2: Ctrl
+    TPMRATIONCUTOFF: 2.0
+    PVALUECUTOFF: 1E-6
+    RCUTOFF: -1.0
+    DIFFEXPIR: requirements/diffexpir_ctrl_unm.txt
+  - NAME: Mut vs Unm
+    DESCR: Mutated vs un-mutated CLL samples
+    COND1: Mut
+    COND2: Unm
+    TPMRATIONCUTOFF: 2.0
+    PVALUECUTOFF: 1E-6
+    RCUTOFF: -1.0
+    DIFFEXPIR: requirements/diffexpir_mut_unm.txt
+SAMPLE_FILE: requirements/cll_samples.tsv
+# Use number from 0 to number of columns - 1 if not header in the file
+SAMPLE_NAME_COLUMN: ECGA_ID
+SAMPLE_TYPE_COLUMN: Mut_Stat

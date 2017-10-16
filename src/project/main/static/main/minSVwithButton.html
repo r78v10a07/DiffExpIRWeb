@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
+    <script type="text/javascript" src="/static/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="/static/d3/d3.js"></script>
+    <script type="text/javascript" src="/static/d3-tip/index.js"></script>
+    <script type="text/javascript" src="/static/main/js/utils.js"></script>
+    <script type="text/javascript" src="/static/main/js/seqviewer.js"></script>
+    <script type="text/javascript" src="/static/main/js/experiment.js"></script>
+    <link rel="stylesheet" href="/static/main/css/layout.css"/>
+    <link rel="stylesheet" href="/static/main/css/style.css"/>
+    <script>
+
+
+        function drawTable() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('number', 'Salary');
+            data.addColumn('boolean', 'Full Time Employee');
+            data.addRows([
+                ['Mike', {v: 10000, f: '$10,000'}, true],
+                ['Jim', {v: 8000, f: '$8,000'}, false],
+                ['Alice', {v: 12500, f: '$12,500'}, true],
+                ['Bob', {v: 7000, f: '$7,000'}, true]
+            ]);
+
+            var table = new google.visualization.Table(document.getElementById('table_div'));
+
+            google.visualization.events.addListener(table, "select", function () {
+                console.log("Google chart listener triggered");
+                loadSVdata();
+            });
+
+            table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+        }
+
+        google.load("visualization", "1", {
+            "callback": drawTable,
+            "packages": ["corechart", "table", "controls", "scatter"]
+        });
+
+    </script>
+</head>
+<body>
+
+<div id="intron-popup" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <img id="intron_loading_icon" class="visible" src="/static/main/images/bigrotation2.gif"
+             alt="Retrieving data ... "/>
+        <div id="intron_div_data" class="visible" snp_name="">
+            <h2 id="intron_title">Intron</h2>
+            Location
+            <spam id="chr-name"></spam>
+            :
+            <spam id="intron-loc"></spam>
+            <br>
+            Gene Name:
+            <spam id="gene-name"></spam>
+            <br>
+            <h3>Genome Browser</h3>
+            <div id="SV0" class="SeqViewerApp"></div>
+        </div>
+    </div>
+</div>
+
+<p/>
+<button id="start_button" onclick=loadSV()>Load SV</button>
+<p/>
+<div id="table_div"></div>
+</body>
+</html>

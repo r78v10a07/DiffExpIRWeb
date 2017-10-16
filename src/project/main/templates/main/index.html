@@ -1,0 +1,48 @@
+{% extends 'main/_base.html' %}
+
+{% block home_page %}
+
+    {% load staticfiles %}
+    {% csrf_token %}
+    <h2>Projects</h2>
+    {% for p in prjs %}
+        <div id="prj_{{ p.id }}" class="data_block">
+            <a href="{% url 'diffexpir:prj' p.id %}" title="{{ p.name }}"><h2>{{ p.name }}</h2></a>
+            <p>{{ p.description }}</p>
+        </div>
+    {% endfor %}
+{% endblock home_page %}
+
+{% block right_side_bar %}
+    <div id="right-sidebar"
+         style="background-color: aliceblue;padding-top: 10px;padding-bottom: 10px;">
+        <div id="jobs_list" class="sidebar_box">
+            <h2>Projects</h2>
+            <ul>{% for p in prjs %}
+                <li><a href="{% url 'diffexpir:prj' p.id %}"
+                       title="{{ p.name }}">{{ p.name|slice:"0:18" }}...</a>
+                </li>
+            {% empty %}
+                -- None --
+            {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        <h2 style="margin-left: 20px;">Publications</h2>
+
+        <div style="font-size: 90%;">
+            <ol>
+                {% for p in papers %}
+                    <li>
+                        {{ p.authors }} <a href="{{ p.url }}"
+                                           target="_blank">{{ p.title }}</a>,
+                        <b>{{ p.journal }}.</b> ({{ p.year }}) {{ p.volume }}
+                        ({{ p.issue }}):{{ p.pages }}
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+{% endblock right_side_bar %}
