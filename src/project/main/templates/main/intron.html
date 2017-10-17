@@ -91,11 +91,11 @@
         <h2 style="margin-left: 20px;">Condition {{ intron.exp.condition2.name }} samples</h2>
 
         <div style="font-size: 90%; height: 400px;overflow:auto;">
-            <input type="checkbox" id="cond2_sample_all" style="margin-left: 44px;"/> Select all
+            <input type="checkbox" id="cond2_sample_all" style="margin-left: 44px;" checked/> Select all
             <ol style="margin-top: 0px;">
                 {% for s in samples2 %}
                     <li>
-                        <input type="checkbox" class="cond2_samples" id="cond2_sample_{{ s.id }}"/> {{ s.name }}
+                        <input type="checkbox" class="cond2_samples" id="cond2_sample_{{ s.id }}" checked/> {{ s.name }}
                     </li>
                 {% empty %}
                     -- None --
