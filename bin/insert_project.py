@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-import os
+import sys
 import pandas
 import argparse
 import sqlite3
-import io
 import yaml
 import json
 import math
@@ -68,11 +67,29 @@ def loading_genes(conn, chr_id):
 def loading_chromosomes(conn):
     c_c = conn.cursor()
     chr = {}
-    for row in c_c.execute("SELECT id,name FROM main_chromosome"):
+    for row in c_c.execute("SELECT id,name,refseqacc  FROM main_chromosome"):
         chr[row[1]] = {}
         chr[row[1]]['ID'] = row[0]
+        chr[row[1]]['refseqacc'] = row[2]
         chr[row[1]]['genes'] = loading_genes(conn, row[0])
     return chr
+
+
+def loading_chromosomes_from_assembly(conn, assembly_report):
+    data = pandas.read_csv(assembly_report, sep='\t', comment='#', header=None)
+    chr = loading_chromosomes(conn)
+    c = conn.cursor()
+    for index, row in data.loc[data[6].str.startswith('NC_')].iterrows():
+        if row[9] not in chr:
+            chr[row[9]] = {}
+            chr[row[9]]['refseqacc'] = row[6]
+            c.execute("INSERT INTO main_chromosome (name,refseqacc) VALUES ('" + row[9] + "','" + row[6] + "')")
+        elif chr[row[9]]['refseqacc'] != row[6]:
+            print('Chromosome: ' + row[9] + ' is already inserted with another Assembly Report.')
+            print('This is system is designed to host experiments using the same Human Genome')
+            sys.exit(-1)
+    conn.commit()
+    return loading_chromosomes(conn)
 
 
 if __name__ == '__main__':
@@ -134,7 +151,7 @@ if __name__ == '__main__':
 
             c.executemany("INSERT INTO main_sample_condition (sample_id, condition_id) VALUES (?,?)", condition_samples)
 
-            chr = loading_chromosomes(conn)
+            chr = loading_chromosomes_from_assembly(conn, yaml_data['ASSEMBLY_REPORT'])
 
             print('Inserting experiments')
             for exp in yaml_data['EXPERIMENTS']:
@@ -148,28 +165,21 @@ if __name__ == '__main__':
                     exp_id = c.lastrowid
 
                     diffexpir = pandas.read_csv(exp['DIFFEXPIR'], sep='\t')
-                    load_again = False
-                    for ch, l in diffexpir.groupby('Chr'):
-                        if ch not in chr:
-                            load_again = True
-                            c.execute("INSERT INTO main_chromosome (name) VALUES ('" + ch + "')")
-                    if load_again:
-                        conn.commit()
-                        chr = loading_chromosomes(conn)
 
                     load_again = False
                     for g, l in diffexpir.groupby('GeneId'):
                         for i, r in l.iterrows():
+                            if r['Chr'] not in chr:
+                                print('Chromosome: ' + r['Chr'] + ' is not inserted in the database.')
+                                print('This is system is designed to host experiments using the same Human Genome')
+                                sys.exit(-1)
                             if g not in chr[r['Chr']]['genes']:
                                 load_again = True
-                                c.execute("INSERT INTO main_gene (name, chr_id) VALUES ('" + g + "'," + str(
-                                    chr[r['Chr']]['ID']) + ")")
+                                c.execute("INSERT INTO main_gene (name, chr_id) VALUES ('" + g + "'," + str(chr[r['Chr']]['ID']) + ")")
                                 chr[r['Chr']]['genes'][g] = {'ID': c.lastrowid, 'introns': {}}
                             if r['Intron_Start'] not in chr[r['Chr']]['genes'][g]['introns']:
                                 load_again = True
-                                c.execute("INSERT INTO main_intron (start, end, gene_id) VALUES (" + str(
-                                    r['Intron_Start']) + "," + str(r['Intron_End']) + "," + str(
-                                    chr[r['Chr']]['genes'][g]['ID']) + ")")
+                                c.execute("INSERT INTO main_intron (start, end, gene_id) VALUES (" + str(r['Intron_Start']) + "," + str(r['Intron_End']) + "," + str(chr[r['Chr']]['genes'][g]['ID']) + ")")
                                 chr[r['Chr']]['genes'][g]['introns'][r['Intron_Start']] = {'ID': c.lastrowid}
                             c.executemany(
                                 "INSERT INTO main_experimenthasintron (exp_id, intron_id, pvalue, TPM1, TPM2, fc, r1, r2, chr, gene, start, end) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",

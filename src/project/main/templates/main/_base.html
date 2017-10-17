@@ -11,15 +11,22 @@
 
     {% compress css %}
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript" src="https://test.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
+        <script type="text/javascript" src="https://www.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
         <script type="text/javascript" src="{% static 'jquery/dist/jquery.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'underscore/underscore-min.js' %}"></script>
         <script type="text/javascript" src="{% static 'd3/d3.js' %}"></script>
         <script type="text/javascript" src="{% static 'd3-tip/index.js' %}"></script>
+
+        <script>
+            var service_path = "{% url 'diffexpir:service' %}"
+            var intron_path = "{% url 'diffexpir:intron' %}"
+        </script>
+
         <script type="text/javascript" src="{% static 'main/js/utils.js' %}"></script>
         <script type="text/javascript" src="{% static 'main/js/seqviewer.js' %}"></script>
         <script type="text/javascript" src="{% static 'main/js/experiment.js' %}"></script>
+        <script type="text/javascript" src="{% static 'main/js/intron.js' %}"></script>
         <link rel="stylesheet" href="{% static 'main/css/layout.css' %}"/>
         <link rel="stylesheet" href="{% static 'main/css/style.css' %}"/>
 

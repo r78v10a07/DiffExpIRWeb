@@ -90,30 +90,9 @@
                                 <div class="table_cell">
                                     <select id="chrbox" name="chrbox" style="margin-left: 107px;">
                                         <option value="0" selected="selected"> All Chromosomes</option>
-                                        <option value="1">Chr1</option>
-                                        <option value="2">Chr2</option>
-                                        <option value="3">Chr3</option>
-                                        <option value="4">Chr4</option>
-                                        <option value="5">Chr5</option>
-                                        <option value="6">Chr6</option>
-                                        <option value="7">Chr7</option>
-                                        <option value="8">Chr8</option>
-                                        <option value="9">Chr9</option>
-                                        <option value="10">Chr10</option>
-                                        <option value="11">Chr11</option>
-                                        <option value="12">Chr12</option>
-                                        <option value="13">Chr13</option>
-                                        <option value="14">Chr14</option>
-                                        <option value="15">Chr15</option>
-                                        <option value="16">Chr16</option>
-                                        <option value="17">Chr17</option>
-                                        <option value="18">Chr18</option>
-                                        <option value="19">Chr19</option>
-                                        <option value="20">Chr20</option>
-                                        <option value="21">Chr21</option>
-                                        <option value="22">Chr22</option>
-                                        <option value="X">ChrX</option>
-                                        <option value="Y">ChrY</option>
+                                        {% for c in chrs %}
+                                            <option value="{{ c.name }}">{{ c.name }}</option>
+                                        {% endfor %}
                                     </select>
 
                                     <div class="invisible">

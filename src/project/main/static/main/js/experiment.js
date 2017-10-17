@@ -157,26 +157,6 @@ function print_plot(data) {
     svg.call(dragBehavior);
 }
 
-function loadSVdata() {
-    "use strict";
-    console.log("loadSVdata");
-    var modal = document.getElementById("intron-popup");
-    var span = document.getElementsByClassName("close")[0];
-    span.onclick = function () {
-        modal.style.display = "none";
-        $("#SV0").empty();
-    };
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-            $("#SV0").empty();
-        }
-    };
-    modal.style.display = "block";
-    var app = SeqView.App.findAppByDivId('SV0') || new SeqView.App('SV0');
-    app.reload("appname=testapp&amp;id=NC_000021");
-}
-
 function draw_intron_table(jsonData) {
     "use strict";
     var dashboard = new google.visualization.Dashboard(document.getElementById("intron_list_container"));
@@ -210,7 +190,7 @@ function draw_intron_table(jsonData) {
     $("#chrbox").change(function () {
         var value = "";
         if ($("#chrbox").val() !== "0") {
-            value = "chr" + $("#chrbox").val();
+            value = $("#chrbox").val();
         }
         textChrFilter.setState({
             "value": value
@@ -245,7 +225,7 @@ function draw_intron_table(jsonData) {
         var dt = tableWrapper.getDataTable();
         if (obj.length === 1) {
             console.log("Selecting: " + obj[0].row);
-            var win = window.open("/intron/" + dt.getValue(obj[0].row, 0) + "/", "_blank");
+            var win = window.open(intron_path + dt.getValue(obj[0].row, 0) + "/", "_blank");
             if (win) {
                 //Browser has allowed it to be opened
                 win.focus();
@@ -334,7 +314,7 @@ function retrieve_experiment_data_container() {
     query.pvalue_cutoff = $("#pvalue_cutoff").val();
     query.r_cutoff = $("#r_cutoff").val();
     query.fc_cutoff = $("#fc_cutoff").val();
-    postAjax("/service/", "search", "expintron", JSON.stringify(query), function (ajax_data) {
+    postAjax(service_path, "search", "expintron", JSON.stringify(query), function (ajax_data) {
         var modelData = JSON.parse(ajax_data.response.value);
         var pvalue_cutoff = $("#pvalue_cutoff").val();
         var fc_cutoff = $("#fc_cutoff").val();

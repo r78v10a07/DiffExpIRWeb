@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^prj/$', views.project, name="prj"),
     url(r'^exp/(?P<id>\d*)/$', views.experiment, name="exp"),
     url(r'^intron/(?P<id>\d*)/$', views.intron, name="intron"),
+    url(r'^intron/$', views.intron, name="intron"),
     url(r'^service/$', views.service, name="service"),
 ]

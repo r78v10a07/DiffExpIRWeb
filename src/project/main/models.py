@@ -58,6 +58,7 @@ class Experiment(models.Model):
 class Chromosome(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=False, null=False)
+    refseqacc = models.CharField(max_length=255, blank=False, null=False)
 
     def __str__(self):
         return '%s' % (self.name)

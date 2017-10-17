@@ -36,13 +36,16 @@ def project(request, id=False):
 
 
 def experiment(request, id=False):
+    chrs = Chromosome.objects.all()
     exp = Experiment.objects.get(id=id)
+
     exps = Experiment.objects.filter(
         Q(condition1__prj__id=exp.condition1.prj_id) | Q(condition2__prj__id=exp.condition1.prj_id))
     context = {
         'title': 'Experiment',
         'exp': exp,
         'exps': exps,
+        'chrs':chrs,
         'current_menu': 'Experiment'
     }
     return render(request, 'main/experiment.html', context)
@@ -109,5 +112,8 @@ def intron(request, id=False):
     if id:
         intron = ExperimentHasIntron.objects.get(id=id)
         context['intron'] = intron
+        context['chr'] = intron.intron.gene.chr.refseqacc
+        context['samples1'] = intron.exp.condition1.sample.all()
+        context['samples2'] = intron.exp.condition2.sample.all()
         context['coord'] = str(intron.start - 100) + ":" + str(intron.end + 100)
     return render(request, 'main/intron.html', context)
