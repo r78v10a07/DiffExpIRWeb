@@ -1,3 +1,4 @@
+import os
 import json
 import math
 
@@ -7,6 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotAllowed
 
 from project.main.models import *
+from project.settings import STATIC_ROOT
 
 
 def index(request):
@@ -45,7 +47,7 @@ def experiment(request, id=False):
         'title': 'Experiment',
         'exp': exp,
         'exps': exps,
-        'chrs':chrs,
+        'chrs': chrs,
         'current_menu': 'Experiment'
     }
     return render(request, 'main/experiment.html', context)
@@ -75,7 +77,8 @@ def service(request):
                         else:
                             queryset = queryset.filter(pvalue__lte=0.05)
                         if 'fc_cutoff' in value:
-                            queryset = queryset.filter(Q(fc__lte=-1.0 * float(value['fc_cutoff'])) | Q(fc__gte=float(value['fc_cutoff'])))
+                            queryset = queryset.filter(
+                                Q(fc__lte=-1.0 * float(value['fc_cutoff'])) | Q(fc__gte=float(value['fc_cutoff'])))
                     if 'r_cutoff' in value:
                         queryset = queryset.filter(
                             Q(r1__gte=float(value['r_cutoff'])) | Q(r2__gte=float(value['r_cutoff'])))
@@ -113,7 +116,14 @@ def intron(request, id=False):
         intron = ExperimentHasIntron.objects.get(id=id)
         context['intron'] = intron
         context['chr'] = intron.intron.gene.chr.refseqacc
-        context['samples1'] = intron.exp.condition1.sample.all()
-        context['samples2'] = intron.exp.condition2.sample.all()
+        context['samples1'] = []
+        for s in intron.exp.condition1.sample.all():
+            if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
+                context['samples1'].append(s.name)
+        context['samples2'] = []
+        for s in intron.exp.condition2.sample.all():
+            if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
+                context['samples2'].append(s.name)
         context['coord'] = str(intron.start - 100) + ":" + str(intron.end + 100)
+        context['experiments'] = ExperimentHasIntron.objects.filter(chr=intron.chr, start=intron.start, end=intron.end)
     return render(request, 'main/intron.html', context)

@@ -24,40 +24,65 @@
         }
     </style>
 
-    <div id="intron_div" intron_id="{{ intron.id }}" intron_coord="{{ coord }}" intron_chr="{{ chr }}">
+    <div id="intron_div" intron_id="{{ intron.intron_id }}" intron_coord="{{ coord }}" intron_chr="{{ chr }}">
         <h2>Intronic region: {{ intron.chr }}:{{ intron.start }}-{{ intron.end }}</h2>
-        <div class="table intron_values">
+        <div class="table">
             <div class="table_row">
-                <div class="table_cell intron_values_title">Gene</div>
-                <div class="table_cell intron_values_val">{{ intron.gene }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">P-Value</div>
-                <div class="table_cell intron_values_val">{{ intron.pvalue }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">TPM1</div>
-                <div class="table_cell intron_values_val">{{ intron.TPM1 }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">TPM2</div>
-                <div class="table_cell intron_values_val">{{ intron.TPM2 }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">Log2(FC)</div>
-                <div class="table_cell intron_values_val">{{ intron.fc }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">R1</div>
-                <div class="table_cell intron_values_val">{{ intron.r1 }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">R2</div>
-                <div class="table_cell intron_values_val">{{ intron.r2 }}</div>
-            </div>
-            <div class="table_row">
-                <div class="table_cell intron_values_title">RefSeq Acc</div>
-                <div class="table_cell intron_values_val">{{ chr }}</div>
+                <div class="table_cell">
+                    <div class="table intron_values">
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">Gene</div>
+                            <div class="table_cell intron_values_val">{{ intron.gene }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">P-Value</div>
+                            <div class="table_cell intron_values_val">{{ intron.pvalue }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">TPM1</div>
+                            <div class="table_cell intron_values_val">{{ intron.TPM1 }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">TPM2</div>
+                            <div class="table_cell intron_values_val">{{ intron.TPM2 }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">Log2(FC)</div>
+                            <div class="table_cell intron_values_val">{{ intron.fc }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">R1</div>
+                            <div class="table_cell intron_values_val">{{ intron.r1 }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">R2</div>
+                            <div class="table_cell intron_values_val">{{ intron.r2 }}</div>
+                        </div>
+                        <div class="table_row">
+                            <div class="table_cell intron_values_title">RefSeq Acc</div>
+                            <div class="table_cell intron_values_val">{{ chr }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table_cell">
+                    <div class="intron_values">
+                        <div class="intron_values_title">Experiments</div>
+                        <div>
+                            <ol>
+                                {% for e in experiments %}
+                                    <li>
+                                        {% if intron.id != e.id %}
+                                            <a href="{% url 'diffexpir:intron' e.id %}"
+                                               target="_blank">{{ e.exp.name }}</a>
+                                        {% else %}
+                                            {{ e.exp.name }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="SV0" class="SeqViewerApp"></div>
@@ -73,14 +98,15 @@
 
 {% block right_side_bar %}
     <div id="right-sidebar" style="background-color: aliceblue;padding-top: 10px;padding-bottom: 10px;">
+        <button id="update_samples" onclick="loadseqviwer();" style="margin-top: 0px;margin-left: 10px;">Update</button>
         <h2 style="margin-left: 20px;">Condition {{ intron.exp.condition1.name }} samples</h2>
 
-        <div style="font-size: 90%; height: 400px;overflow:auto;">
+        <div id="cond1" sample="{{ intron.exp.condition1.name }}" style="font-size: 90%; height: 400px;overflow:auto;">
             <input type="checkbox" id="cond1_sample_all" style="margin-left: 44px;" checked/> Select all
             <ol style="margin-top: 0px;">
                 {% for s in samples1 %}
                     <li>
-                        <input type="checkbox" class="cond1_samples" id="cond1_sample_{{ s.id }}" checked/> {{ s.name }}
+                        <input type="checkbox" class="cond1_samples" id="{{ s }}" checked/> {{ s }}
                     </li>
                 {% empty %}
                     -- None --
@@ -90,12 +116,12 @@
         <hr>
         <h2 style="margin-left: 20px;">Condition {{ intron.exp.condition2.name }} samples</h2>
 
-        <div style="font-size: 90%; height: 400px;overflow:auto;">
+        <div id="cond2" sample="{{ intron.exp.condition2.name }}" style="font-size: 90%; height: 400px;overflow:auto;">
             <input type="checkbox" id="cond2_sample_all" style="margin-left: 44px;" checked/> Select all
             <ol style="margin-top: 0px;">
                 {% for s in samples2 %}
                     <li>
-                        <input type="checkbox" class="cond2_samples" id="cond2_sample_{{ s.id }}" checked/> {{ s.name }}
+                        <input type="checkbox" class="cond2_samples" id="{{ s }}" checked/> {{ s }}
                     </li>
                 {% empty %}
                     -- None --
@@ -104,22 +130,51 @@
         </div>
     </div>
     <script>
-        $('#cond1_sample_all').click( function() {
+        function loadseqviwer() {
+            "use strict";
+            $("#SV0").empty();
+            console.log("loadSVdata");
+            var app = SeqView.App.findAppByDivId('SV0') || new SeqView.App('SV0');
+            var id = $("#intron_div").attr("intron_id");
+            var chr = $("#intron_div").attr("intron_chr");
+            var coord = $("#intron_div").attr("intron_coord");
+            var cond1 = $("#cond1").attr("sample");
+            var cond2 = $("#cond2").attr("sample");
+            console.log("Coord: " + coord);
+            var str = "appname=diffexpir&amp;id=" + chr;
+            console.log("Static BAM file" + static_bam_path);
+            str += "&amp;tracks=";
+            $('.cond1_samples').each(function (i, obj) {
+                if (obj.checked == true) {
+                    str += "[amend][key:alignment_track,display_name:" + cond1 + "\\:" + obj.id + ",dbname:cSRA,annots:https\\://dev.ncbi.nlm.nih.gov" + static_bam_path + obj.id + "/" + id + ".bam,Layout:Packed]";
+                }
+            });
+            $('.cond2_samples').each(function (i, obj) {
+                if (obj.checked == true) {
+                    str += "[amend][key:alignment_track,display_name:" + cond2 + "\\:" + obj.id + ",dbname:cSRA,annots:https\\://dev.ncbi.nlm.nih.gov" + static_bam_path + obj.id + "/" + id + ".bam,Layout:Packed]";
+                }
+            });
+            str += "&amp;v=" + coord;
+            console.log(str);
+            app.reload(str);
+        }
+
+        $('#cond1_sample_all').click(function () {
             console.log('Selecting all cond1');
             $('.cond1_samples').each(function (i, obj) {
-                if (obj.checked == true){
+                if (obj.checked == true) {
                     obj.checked = false;
-                }else{
+                } else {
                     obj.checked = true;
                 }
             });
         });
-        $('#cond2_sample_all').click( function() {
+        $('#cond2_sample_all').click(function () {
             console.log('Selecting all cond2');
             $('.cond2_samples').each(function (i, obj) {
-                if (obj.checked == true){
+                if (obj.checked == true) {
                     obj.checked = false;
-                }else{
+                } else {
                     obj.checked = true;
                 }
             });

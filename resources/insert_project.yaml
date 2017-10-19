@@ -51,3 +51,7 @@ SAMPLE_FILE: resources/cll_samples.tsv
 SAMPLE_NAME_COLUMN: ECGA_ID
 SAMPLE_TYPE_COLUMN: Mut_Stat
 ASSEMBLY_REPORT: resources/GCF_000001405.25_GRCh37.p13_assembly_report.txt
+# Use absolute path from here
+BAM_FILES: /panfs/pan1.be-md.ncbi.nlm.nih.gov/alt_splicing/bioNotebook-DiffExpIR/results/CLL_EGAS00001000374/STAR_hg19_Human
+BAM_FILES_INTRON: /panfs/pan1.be-md.ncbi.nlm.nih.gov/alt_splicing/bioNotebook-DiffExpIR/results/CLL_EGAS00001000374/select_introns
+PROJECT_BIM_DIR: /net/mwebdev2/export/home/web/public/data/projects/diffexpir/bin

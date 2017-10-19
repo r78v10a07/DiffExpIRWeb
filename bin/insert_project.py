@@ -1,11 +1,13 @@
 #!/usr/bin/env python
+import os
 import sys
+import math
 import pandas
 import argparse
 import sqlite3
 import yaml
 import json
-import math
+import subprocess
 
 
 def clean_db(db_file):
@@ -97,6 +99,8 @@ if __name__ == '__main__':
     parser.add_argument('-d', help='SQLite database', required=True)
     parser.add_argument('-c', help='Clean database', required=False, action='store_true')
     parser.add_argument('--yaml', help='Data file in Yaml format', required=False)
+    parser.add_argument('--samtools_out',
+                        help='Write out an script to run in a queue system to create introns BAM files', required=True)
 
     args = parser.parse_args()
     db_file = args.d
@@ -175,11 +179,14 @@ if __name__ == '__main__':
                                 sys.exit(-1)
                             if g not in chr[r['Chr']]['genes']:
                                 load_again = True
-                                c.execute("INSERT INTO main_gene (name, chr_id) VALUES ('" + g + "'," + str(chr[r['Chr']]['ID']) + ")")
+                                c.execute("INSERT INTO main_gene (name, chr_id) VALUES ('" + g + "'," + str(
+                                    chr[r['Chr']]['ID']) + ")")
                                 chr[r['Chr']]['genes'][g] = {'ID': c.lastrowid, 'introns': {}}
                             if r['Intron_Start'] not in chr[r['Chr']]['genes'][g]['introns']:
                                 load_again = True
-                                c.execute("INSERT INTO main_intron (start, end, gene_id) VALUES (" + str(r['Intron_Start']) + "," + str(r['Intron_End']) + "," + str(chr[r['Chr']]['genes'][g]['ID']) + ")")
+                                c.execute("INSERT INTO main_intron (start, end, gene_id) VALUES (" + str(
+                                    r['Intron_Start']) + "," + str(r['Intron_End']) + "," + str(
+                                    chr[r['Chr']]['genes'][g]['ID']) + ")")
                                 chr[r['Chr']]['genes'][g]['introns'][r['Intron_Start']] = {'ID': c.lastrowid}
                             c.executemany(
                                 "INSERT INTO main_experimenthasintron (exp_id, intron_id, pvalue, TPM1, TPM2, fc, r1, r2, chr, gene, start, end) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -190,4 +197,43 @@ if __name__ == '__main__':
                         conn.commit()
                         chr = loading_chromosomes(conn)
             conn.commit()
+
+            print('Creating BAM files for inserted introns')
+            print('Using files in ' + yaml_data['BAM_FILES'] + ' directory')
+            print('Loading samples data')
+            samples = []
+            sample_data = pandas.read_csv(yaml_data['SAMPLE_FILE'], sep='\t')
+            for index, row in sample_data.iterrows():
+                samples.append(row[yaml_data['SAMPLE_NAME_COLUMN']])
+            files = [name for root, dirs, files in os.walk(yaml_data['BAM_FILES']) for name in files if
+                     name.endswith(".bam")]
+            if not os.path.exists(yaml_data['BAM_FILES_INTRON']):
+                os.mkdir(yaml_data['BAM_FILES_INTRON'])
+            os.chdir(yaml_data['BAM_FILES_INTRON'])
+            print('Working on ' + yaml_data['BAM_FILES_INTRON'])
+            chr = loading_chromosomes(conn)
+            with open(args.samtools_out, 'w') as f_out:
+                for f in files:
+                    sample = ''
+                    for s in samples:
+                        if s in f:
+                            sample = s
+                            break
+
+                    if sample:
+                        if not os.path.exists(sample):
+                            os.mkdir(sample)
+                        print('Processing BAM file:' + f)
+                        for c in chr:
+                            for g in chr[c]['genes']:
+                                for i in chr[c]['genes'][g]['introns']:
+                                    f_out.write(
+                                        yaml_data['PROJECT_BIM_DIR'] + '/samtools.sh '
+                                        + yaml_data['BAM_FILES'] + '/' + f
+                                        + ' ' + c + ':' + str(i) + '-' + str(chr[c]['genes'][g]['introns'][i]['end'])
+                                        + ' ' + sample + '/' + str(chr[c]['genes'][g]['introns'][i]['ID']) + '.bam'
+                                        + '\n'
+                                    )
+                                    print(c + ' ' + g + ' ' + str(chr[c]['genes'][g]['introns'][i]['ID']) + ' ' + str(i) + '-' + str(chr[c]['genes'][g]['introns'][i]['end']))
+                                    # subprocess.call([yaml_data['PROJECT_BIM_DIR'] + '/samtools.sh', yaml_data['BAM_FILES'] + '/' + f, c + ':' + str(i) + '-' + str(chr[c]['genes'][g]['introns'][i]['end']), sample + '/' + str(chr[c]['genes'][g]['introns'][i]['ID'])+ '.bam'])
             conn.close()

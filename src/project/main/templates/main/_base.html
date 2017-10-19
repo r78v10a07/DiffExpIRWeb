@@ -19,8 +19,9 @@
         <script type="text/javascript" src="{% static 'd3-tip/index.js' %}"></script>
 
         <script>
-            var service_path = "{% url 'diffexpir:service' %}"
-            var intron_path = "{% url 'diffexpir:intron' %}"
+            var static_bam_path = "{% static 'main/bam/' %}";
+            var service_path = "{% url 'diffexpir:service' %}";
+            var intron_path = "{% url 'diffexpir:intron' %}";
         </script>
 
         <script type="text/javascript" src="{% static 'main/js/utils.js' %}"></script>
