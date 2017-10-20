@@ -178,12 +178,7 @@ def search(request):
             context['results'] = paginator.page(context['page'])
         elif query.startswith('gene_id'):
             gene = Gene.objects.get(id=int(query.split(':')[1]))
-            queryset = Intron.objects.all()
-            queryset = queryset.filter(gene=gene)
-            if start is not None:
-                queryset = queryset.filter(start__gte=start)
-            if end is not None:
-                queryset = queryset.filter(end__lte=end)
+            queryset = Intron.objects.filter(gene=gene)
             queryset = queryset.order_by('start')
             context['total'] = queryset.count()
             context['type'] = 'introns'
@@ -192,7 +187,15 @@ def search(request):
         else:
             queryset = Gene.objects.filter(name__contains=query.upper()).order_by('chr__id', 'name')
             context['total'] = queryset.count()
-            paginator = Paginator(queryset, 25)
-            context['type'] = 'genes'
-            context['results'] = paginator.page(context['page'])
+            if context['total'] == 1:
+                queryset = Intron.objects.filter(gene=queryset.first())
+                queryset = queryset.order_by('start')
+                context['total'] = queryset.count()
+                context['type'] = 'introns'
+                paginator = Paginator(queryset, 25)
+                context['results'] = paginator.page(context['page'])
+            else:
+                paginator = Paginator(queryset, 25)
+                context['type'] = 'genes'
+                context['results'] = paginator.page(context['page'])
     return render(request, 'main/search.html', context)
