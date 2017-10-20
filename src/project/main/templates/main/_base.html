@@ -53,9 +53,9 @@
                     <li class="{% if current_menu == 'Home' %}current{% endif %}">
                         <a href="{% url 'diffexpir:index' %}" class="homelink">Home</a>
                     </li>
-                    {#                    <li class="{% if current_menu == 'Projects' %}current{% endif %}">#}
-                    {#                        <a href="{% url 'diffexpir:prj' %}" class="homelink">Projects</a>#}
-                    {#                    </li>#}
+                    <li class="{% if current_menu == 'Search' %}current{% endif %}">
+                        <a href="{% url 'diffexpir:search' %}" class="homelink">Search</a>
+                    </li>
                 </ul>
             </div>
         </div>

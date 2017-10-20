@@ -1,0 +1,179 @@
+{% extends 'main/_base.html' %}
+
+{% block home_page %}
+
+    {% load staticfiles %}
+
+    <style>
+        #sgv-nav-button-w-id,
+        #sgv-nav-button-e-id,
+        #sgv-nav-button-zoom-in-id,
+        #sgv-nav-button-zoom-out-id,
+        #sgv-nav-button-back-id {
+            padding: 2px 4px !important;
+        }
+
+        .search_table_header {
+            background-color: #0b58a2;
+            color: yellow;
+            font-weight: bold;
+        }
+
+        .row1 {
+            background-color: white;
+        }
+
+        .row2 {
+            background-color: aliceblue;
+        }
+
+    </style>
+    <form id="search_form" action="{% url 'diffexpir:search' %}" method="post">
+        <div style="width: 80%;margin-left: 90px;">
+            {% csrf_token %}
+            <div class="table_row">
+                <div class="table_cell">
+                    <h3 for="search_id" style="margin-top: 35px;">Locus ID</h3>
+                    <input id="page_id" name="page_id" type="hidden" value="{{ page }}"/>
+                    <input id="search_id" name="search_id" size="50" type="search" value="{{ query }}"/>
+                    <div style="font-size: small">Gene name (DDX11L1) or genomic coordinates
+                        (chr8:11532494-11621567)
+                    </div>
+                </div>
+                <div class="table_cell">
+                    <div style="margin-top: 69px; margin-left: 105px; width: 95px;">
+                        <img id="searching_icon" class="invisible" src="{% static 'main/images/bigrotation2.gif' %}"
+                             alt="Searching ..."/>
+                        <input id="submit_button" type="submit" value="Submit"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if POST %}
+            <div id="search_result" style="margin-top: 40px;padding-bottom: 20px;width: 80%;margin-left: 90px;">
+                <h3>Found {{ total }} {{ type }}</h3>
+                {% if results.has_previous or results.has_next %}
+                    <div style="text-align: right;">
+                    <span class="step-links">
+                        <span class="current">
+                            Page {{ results.number }} of {{ results.paginator.num_pages }}.
+                        </span>
+                    </span>
+                    </div>
+                {% endif %}
+                {% if type == 'introns' %}
+                    <div class="table">
+                        <div class="table_row search_table_header">
+                            <div class="table_cell">Gene Name</div>
+                            <div class="table_cell">Coordinates</div>
+                            <div class="table_cell">No. Experiments</div>
+                        </div>
+                        {% for i in results %}
+                            {% cycle 'row1' 'row2' as rowcolors silent %}
+                            <div class="table_row {{ rowcolors }}">
+                                <div class="table_cell">{{ i.gene.name }}</div>
+                                <div class="table_cell">
+                                    <a href="{% url 'diffexpir:intron' i.id %}" target="_blank">{{ i.start }}
+                                        - {{ i.end }}</a>
+                                </div>
+                                <div class="table_cell">{{ i.experimenthasintron_set.all|length }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% elif type == 'genes' %}
+                    <div class="table">
+                        <div class="table_row search_table_header">
+                            <div class="table_cell">Chromosome</div>
+                            <div class="table_cell">Gene Name</div>
+                            <div class="table_cell">No. Introns</div>
+                        </div>
+                        {% for i in results %}
+                            {% cycle 'row1' 'row2' as rowcolors silent %}
+                            <div class="table_row {{ rowcolors }}">
+                                <div class="table_cell">{{ i.chr.name }}</div>
+                                <div class="table_cell">
+                                    <a href="#" style="cursor: pointer;" onclick="search_introns('{{ i.id }}');">{{ i.name }}</a>
+                                </div>
+                                <div class="table_cell">{{ i.intron_set.all|length }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if results.has_previous or results.has_next %}
+                    <div id="pagination_id" style="text-align: right;"
+                         last_page="{{ results.paginator.num_pages }}">
+                    <span class="step-links">
+                        <input id="index-first_page" value="<<" {% if not results.has_previous %}
+                               disabled="" {% endif %}
+                               type="button" onclick="paginator('index-first_page');">
+                        <input id="index-previous_page" value="<"  {% if not results.has_previous %}
+                               disabled="" {% endif %} type="button"
+                               onclick="paginator('index-previous_page');">
+                        <input id="index-next_page" value=">" {% if not results.has_next %} disabled="" {% endif %}
+                               type="button" onclick="paginator('index-next_page');">
+                        <input id="index-last_page" value=">>" {% if not results.has_next %} disabled="" {% endif %}
+                               type="button" onclick="paginator('index-last_page');">
+                    </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </form>
+
+    <script>
+        function paginator(id) {
+            var page = $("#page_id").attr("value");
+            if (id === "index-first_page") {
+                page = 1;
+            } else if (id === "index-last_page") {
+                page = $("#pagination_id").attr("last_page");
+            } else if (id === "index-previous_page") {
+                page--;
+            } else if (id === "index-next_page") {
+                page++;
+            }
+            $("#page_id").val(page);
+            $("#search_form").submit();
+        }
+
+        function search_introns(id) {
+            $("#search_id").val("gene_id:" + id);
+            $("#search_form").submit();
+        }
+    </script>
+{% endblock home_page %}
+
+{% block right_side_bar %}
+    <div id="right-sidebar"
+         style="background-color: aliceblue;padding-top: 10px;padding-bottom: 10px;">
+        <div id="jobs_list" class="sidebar_box">
+            <h2>Projects</h2>
+            <ul>{% for p in prjs %}
+                <li><a href="{% url 'diffexpir:prj' p.id %}"
+                       title="{{ p.name }}">{{ p.name|slice:"0:18" }}...</a>
+                </li>
+            {% empty %}
+                -- None --
+            {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        <h2 style="margin-left: 20px;">Publications</h2>
+
+        <div style="font-size: 90%;">
+            <ol>
+                {% for p in papers %}
+                    <li>
+                        {{ p.authors }} <a href="{{ p.url }}"
+                                           target="_blank">{{ p.title }}</a>,
+                        <b>{{ p.journal }}.</b> ({{ p.year }}) {{ p.volume }}
+                        ({{ p.issue }}):{{ p.pages }}
+                    </li>
+                {% empty %}
+                    -- None --
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+{% endblock right_side_bar %}

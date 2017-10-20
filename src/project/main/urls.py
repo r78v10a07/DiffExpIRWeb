@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^exp/(?P<id>\d*)/$', views.experiment, name="exp"),
     url(r'^intron/(?P<id>\d*)/$', views.intron, name="intron"),
     url(r'^intron/$', views.intron, name="intron"),
+    url(r'^search/$', views.search, name="search"),
     url(r'^service/$', views.service, name="service"),
 ]

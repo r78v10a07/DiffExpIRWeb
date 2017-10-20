@@ -1,7 +1,11 @@
 import os
 import json
 import math
+import re
 
+from math import floor
+
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.core import serializers
 from django.shortcuts import render
@@ -127,3 +131,68 @@ def intron(request, id=False):
         context['coord'] = str(intron.start - 100) + ":" + str(intron.end + 100)
         context['experiments'] = ExperimentHasIntron.objects.filter(chr=intron.chr, start=intron.start, end=intron.end)
     return render(request, 'main/intron.html', context)
+
+
+def search(request):
+    prjs = Project.objects.all()
+    context = {
+        'title': '',
+        'prjs': prjs,
+        'POST': False,
+        'query': '',
+        'page': 1,
+        'current_menu': 'Search'
+    }
+    if request.method == "POST":
+        context['POST'] = True
+        query = request.POST.get('search_id', False)
+        context['query'] = query
+        context['page'] = request.POST.get('page_id', 1)
+
+        chr_query = None
+        start = None
+        end = None
+        m = re.search('chr(\w+)(:(\d+)(-(\d+))?)?', query)
+        if m:
+            if m.group(2):
+                start = int(m.group(3))
+                if m.group(5):
+                    end = int(m.group(5))
+                else:
+                    start -= 20
+                    end = start + 40
+            if start is not None and start <= 0:
+                start = 1
+            chr_query = 'chr' + m.group(1).upper()
+            queryset = Intron.objects.all()
+            if chr_query is not None:
+                queryset = queryset.filter(gene__chr__name=chr_query)
+            if start is not None:
+                queryset = queryset.filter(start__gte=start)
+            if end is not None:
+                queryset = queryset.filter(end__lte=end)
+            queryset = queryset.order_by('start')
+            context['total'] = queryset.count()
+            context['type'] = 'introns'
+            paginator = Paginator(queryset, 25)
+            context['results'] = paginator.page(context['page'])
+        elif query.startswith('gene_id'):
+            gene = Gene.objects.get(id=int(query.split(':')[1]))
+            queryset = Intron.objects.all()
+            queryset = queryset.filter(gene=gene)
+            if start is not None:
+                queryset = queryset.filter(start__gte=start)
+            if end is not None:
+                queryset = queryset.filter(end__lte=end)
+            queryset = queryset.order_by('start')
+            context['total'] = queryset.count()
+            context['type'] = 'introns'
+            paginator = Paginator(queryset, 25)
+            context['results'] = paginator.page(context['page'])
+        else:
+            queryset = Gene.objects.filter(name__contains=query.upper()).order_by('chr__id', 'name')
+            context['total'] = queryset.count()
+            paginator = Paginator(queryset, 25)
+            context['type'] = 'genes'
+            context['results'] = paginator.page(context['page'])
+    return render(request, 'main/search.html', context)
