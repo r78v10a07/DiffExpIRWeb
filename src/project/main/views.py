@@ -122,12 +122,12 @@ def intron(request, id=False):
         context['chr'] = intron.intron.gene.chr.refseqacc
         context['samples1'] = []
         for s in intron.exp.condition1.sample.all():
-            if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
-                context['samples1'].append(s.name)
+            # if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
+            context['samples1'].append(s.name)
         context['samples2'] = []
         for s in intron.exp.condition2.sample.all():
-            if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
-                context['samples2'].append(s.name)
+            # if os.path.exists(os.path.join(STATIC_ROOT, 'main/bam/' + s.name + '/' + str(intron.intron_id) + '.bam')):
+            context['samples2'].append(s.name)
         context['coord'] = str(intron.start - 100) + ":" + str(intron.end + 100)
         context['experiments'] = ExperimentHasIntron.objects.filter(chr=intron.chr, start=intron.start, end=intron.end)
     return render(request, 'main/intron.html', context)
