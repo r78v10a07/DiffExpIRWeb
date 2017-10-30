@@ -149,6 +149,9 @@ DEBUG = globals().get('DJANGO_DEBUG')
 if globals().get('DJANGO_STATIC_URL', False):
     STATIC_URL = globals().get('DJANGO_STATIC_URL')
 
+if globals().get('DJANGO_STATIC_ROOT', False):
+    STATIC_URL = globals().get('DJANGO_STATIC_ROOT')
+
 if globals().get('DJANGO_DB_SERVER', False):
     DATABASES['default']['HOST'] = globals().get('DJANGO_DB_SERVER')
 
