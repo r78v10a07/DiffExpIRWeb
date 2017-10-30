@@ -1,12 +1,12 @@
 #!/bin/bash
 
-python3 manage.py migrate                  # Apply database migrations
-python3 manage.py collectstatic --noinput  # Collect static files
+python3 ./bin/manage.py migrate                  # Apply database migrations
+python3 ./bin/manage.py collectstatic --noinput  # Collect static files
 
 # Prepare log files and start outputting logs to stdout
 touch ./logs/gunicorn.log
 touch ./logs/access.log
-tail -n 0 -f *.log &
+tail -n 0 -f ./logs/*.log &
 
 # Start Gunicorn processes
 echo "Starting Gunicorn."

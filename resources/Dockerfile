@@ -37,5 +37,5 @@ RUN pip3 install -r $DOCKYARD_SRVPROJ/requirements/base.txt
 EXPOSE 8000
 
 # Copy entrypoint script into the image
-COPY $DOCKYARD_SRVPROJ/bin/docker-entrypoint.sh /
-ENTRYPOINT ["/docker-entrypoint.sh"]
+#COPY /$DOCKYARD_SRVPROJ/bin/docker-entrypoint.sh /
+ENTRYPOINT ["/home/biodocker/DiffExpIRWeb/bin/docker-entrypoint.sh"]
