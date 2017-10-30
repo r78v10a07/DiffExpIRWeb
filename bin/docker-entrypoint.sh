@@ -1,7 +1,7 @@
 #!/bin/bash
 
-python manage.py migrate                  # Apply database migrations
-python manage.py collectstatic --noinput  # Collect static files
+python3 manage.py migrate                  # Apply database migrations
+python3 manage.py collectstatic --noinput  # Collect static files
 
 # Prepare log files and start outputting logs to stdout
 touch ./logs/gunicorn.log
