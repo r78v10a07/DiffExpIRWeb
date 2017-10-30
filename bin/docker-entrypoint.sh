@@ -2,6 +2,7 @@
 
 python3 ./bin/manage.py makemigrations main
 python3 ./bin/manage.py migrate
+python3 ./bin/manage.py bower_install
 python3 ./bin/manage.py collectstatic --noinput
 
 # Prepare log files and start outputting logs to stdout
