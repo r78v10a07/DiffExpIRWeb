@@ -31,9 +31,11 @@ RUN mkdir logs
 VOLUME ["$DOCKYARD_SRVPROJ/logs/"]
 
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y python3 python3-pip nodejs
+RUN apt-get install -y python3 python3-pip nodejs npm
 RUN pip3 install -r $DOCKYARD_SRVPROJ/requirements/base.txt
+RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN npm install -g bower
+
 
 # Port to expose
 EXPOSE 8000
